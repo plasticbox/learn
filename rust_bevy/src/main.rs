@@ -6,7 +6,6 @@ use bevy::hierarchy::BuildChildren;
 pub(crate) enum Stage {
     AStage,
     BStage,
-    CStage,
 }
 
 #[derive(Component, Debug)]
@@ -64,7 +63,6 @@ fn main() {
 
     app.add_stage(Stage::AStage, SystemStage::parallel());
     app.add_stage(Stage::BStage, SystemStage::parallel());
-    app.add_stage(Stage::CStage, SystemStage::parallel());
     app.add_system_to_stage(Stage::AStage, spawn);
     app.add_system_to_stage(Stage::BStage, add_detect_and_remove);
     app.add_system_to_stage(Stage::BStage, change_detect);
