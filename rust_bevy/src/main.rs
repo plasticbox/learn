@@ -6,7 +6,6 @@ use bevy::hierarchy::BuildChildren;
 pub(crate) enum Set {
     ASet,
     BSet,
-    CSet,
 }
 
 #[derive(Component, Debug)]
@@ -62,15 +61,14 @@ fn main() {
 
     let mut app = App::new();
 
-    app.configure_sets((Set::ASet, Set::BSet, Set::CSet).chain().in_base_set(CoreSet::Update));
+    app.configure_sets((Set::ASet, Set::BSet).chain().in_base_set(CoreSet::Update));
 
     app.add_system(apply_system_buffers.after(Set::ASet));
     app.add_system(apply_system_buffers.after(Set::BSet));
-    app.add_system(apply_system_buffers.after(Set::CSet));
 
     app.add_system(spawn.in_set(Set::ASet));
     app.add_system(add_detect_and_remove.in_set(Set::BSet));
-    app.add_system(change_detect.in_set(Set::CSet));
+    app.add_system(change_detect.in_set(Set::BSet));
 
     println!("update 1");
     app.update();
