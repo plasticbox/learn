@@ -31,7 +31,7 @@ fn spawn(mut cmds: Commands, mut is_run: Local<bool>) {
     }
 }
 
-fn add_detect(mut cmds: Commands, query: Query<(Entity, &TestParent, &Children), Added<Children>>, a_query: Query<&TestChildA>) {
+fn add_detect_and_remove(mut cmds: Commands, query: Query<(Entity, &TestParent, &Children), Added<Children>>, a_query: Query<&TestChildA>) {
     query.iter().for_each(|(entity, parent, children)| {
         println!("add_detect parent: {:?}", parent);
         println!("add_detect children: {:?}", children);
@@ -69,7 +69,7 @@ fn main() {
     app.add_system(apply_system_buffers.after(Set::CSet));
 
     app.add_system(spawn.in_set(Set::ASet));
-    app.add_system(add_detect.in_set(Set::BSet));
+    app.add_system(add_detect_and_remove.in_set(Set::BSet));
     app.add_system(change_detect.in_set(Set::CSet));
 
     println!("update 1");
