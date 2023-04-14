@@ -6,6 +6,8 @@ use bevy::hierarchy::BuildChildren;
 pub(crate) enum Stage {
     AStage,
     BStage,
+    CStage,
+    DStage,
 }
 
 #[derive(Component, Debug)]
@@ -16,6 +18,10 @@ struct TestChildA(i32);
 
 #[derive(Component, Debug)]
 struct TestChildB(String);
+
+#[derive(Component, Debug)]
+struct TestChildC;
+
 
 fn spawn(mut cmds: Commands, mut is_run: Local<bool>) {
     if !*is_run {
@@ -57,15 +63,30 @@ fn change_detect(
     });
 }
 
+fn add_child(
+    mut cmds: Commands,
+    query: Query<(Entity, &TestParent, &Children)>,
+) {
+    query.iter().for_each(|(entity, _, _)| {
+        let id = cmds.spawn(TestChildC).id();
+        cmds.entity(entity).add_child(id);
+
+        println!("add_child");
+    });
+}
+
 fn main() {
 
     let mut app = App::new();
 
     app.add_stage(Stage::AStage, SystemStage::parallel());
     app.add_stage(Stage::BStage, SystemStage::parallel());
+    app.add_stage(Stage::CStage, SystemStage::parallel());
+    app.add_stage(Stage::DStage, SystemStage::parallel());
     app.add_system_to_stage(Stage::AStage, spawn);
     app.add_system_to_stage(Stage::BStage, add_detect_and_remove);
-    app.add_system_to_stage(Stage::BStage, change_detect);
+    app.add_system_to_stage(Stage::CStage, change_detect);
+    app.add_system_to_stage(Stage::DStage, add_child);
 
     println!("update 1");
     app.update();
