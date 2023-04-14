@@ -6,6 +6,8 @@ use bevy::hierarchy::BuildChildren;
 pub(crate) enum Set {
     ASet,
     BSet,
+    CSet,
+    DSet,
 }
 
 #[derive(Component, Debug)]
@@ -16,6 +18,9 @@ struct TestChildA(i32);
 
 #[derive(Component, Debug)]
 struct TestChildB(String);
+
+#[derive(Component, Debug)]
+struct TestChildC;
 
 fn spawn(mut cmds: Commands, mut is_run: Local<bool>) {
     if !*is_run {
@@ -48,12 +53,23 @@ fn change_detect(
     query: Query<(&TestParent, Ref<Children>), Changed<Children>>,
 ) {
     query.iter().for_each(|(parent, children)| {
-        if children.is_added() {
+        if children.is_changed() {
+            println!("change_detect parent: {:?}", parent);
+            println!("change_detect children: {:?}", children);
             return;
         }
+    });
+}
 
-        println!("change_detect parent: {:?}", parent);
-        println!("change_detect children: {:?}", children);
+fn add_child(
+    mut cmds: Commands,
+    query: Query<(Entity, &TestParent, &Children)>,
+) {
+    query.iter().for_each(|(entity, _, _)| {
+        let id = cmds.spawn(TestChildC).id();
+        cmds.entity(entity).add_child(id);
+
+        println!("add_child");
     });
 }
 
@@ -61,14 +77,17 @@ fn main() {
 
     let mut app = App::new();
 
-    app.configure_sets((Set::ASet, Set::BSet).chain().in_base_set(CoreSet::Update));
+    app.configure_sets((Set::ASet, Set::BSet, Set::CSet, Set::DSet).chain().in_base_set(CoreSet::Update));
 
-    app.add_system(apply_system_buffers.after(Set::ASet));
-    app.add_system(apply_system_buffers.after(Set::BSet));
+    // app.add_system(apply_system_buffers.after(Set::ASet));
+    // app.add_system(apply_system_buffers.after(Set::BSet));
+    // app.add_system(apply_system_buffers.after(Set::CSet));
+    // app.add_system(apply_system_buffers.after(Set::DSet));
 
     app.add_system(spawn.in_set(Set::ASet));
     app.add_system(add_detect_and_remove.in_set(Set::BSet));
-    app.add_system(change_detect.in_set(Set::BSet));
+    app.add_system(change_detect.in_set(Set::CSet));
+    //app.add_system(add_child.in_set(Set::CSet));
 
     println!("update 1");
     app.update();
