@@ -2,9 +2,11 @@ use bevy::prelude::*;
 use bevy::hierarchy::Children;
 use bevy::hierarchy::BuildChildren;
 
-#[derive(StageLabel)]
-pub(crate) enum Stage {
-    AStage,
+#[derive(Debug, Hash, PartialEq, Eq, Clone, SystemSet)]
+pub(crate) enum Set {
+    ASet,
+    BSet,
+    CSet,
 }
 
 #[derive(Component, Debug)]
@@ -44,10 +46,10 @@ fn add_detect(mut cmds: Commands, query: Query<(Entity, &TestParent, &Children),
 }
 
 fn change_detect(
-    query: Query<(&TestParent, &Children, ChangeTrackers<Children>), Changed<Children>>,
+    query: Query<(&TestParent, Ref<Children>), Changed<Children>>,
 ) {
-    query.iter().for_each(|(parent, children, tracker)| {
-        if tracker.is_added() {
+    query.iter().for_each(|(parent, children)| {
+        if children.is_added() {
             return;
         }
 
@@ -60,10 +62,15 @@ fn main() {
 
     let mut app = App::new();
 
-    app.add_stage(Stage::AStage, SystemStage::parallel());
-    app.add_system_to_stage(Stage::AStage, spawn);
-    app.add_system_to_stage(Stage::AStage, add_detect);
-    app.add_system_to_stage(Stage::AStage, change_detect);
+    app.configure_sets((Set::ASet, Set::BSet, Set::CSet).chain().in_base_set(CoreSet::Update));
+
+    app.add_system(apply_system_buffers.after(Set::ASet));
+    app.add_system(apply_system_buffers.after(Set::BSet));
+    app.add_system(apply_system_buffers.after(Set::CSet));
+
+    app.add_system(spawn.in_set(Set::ASet));
+    app.add_system(add_detect.in_set(Set::BSet));
+    app.add_system(change_detect.in_set(Set::CSet));
 
     println!("update 1");
     app.update();

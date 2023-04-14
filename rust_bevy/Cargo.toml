@@ -9,7 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 #tokio = { version = "1.19", features = ["full"] }
-bevy = { version = "0.9.1" }
+bevy = { version = "0.10.1" }
 
 ## Enable a small amount of optimization in debug mode
 #[profile.dev]
